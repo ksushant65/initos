@@ -45,61 +45,14 @@ static char _stack[GNRC_PKTDUMP_STACKSIZE];
 
 static void _dump_snip(gnrc_pktsnip_t *pkt)
 {
-    switch (pkt->type) {
-        case GNRC_NETTYPE_UNDEF:
-            printf("NETTYPE_UNDEF (%i)\n", pkt->type);
-            od_hex_dump(pkt->data, pkt->size, OD_WIDTH_DEFAULT);
+  char addr_str[IPV6_ADDR_MAX_STR_LEN];
+  ipv6_hdr_t *hdr = pkt->data;
+  switch (pkt->type) {
+      case GNRC_NETTYPE_IPV6:
+            printf("This guy %s just pinged\n", ipv6_addr_to_str(addr_str, &hdr->src,
+                    sizeof(addr_str)));
             break;
-#ifdef MODULE_GNRC_NETIF
-        case GNRC_NETTYPE_NETIF:
-            printf("NETTYPE_NETIF (%i)\n", pkt->type);
-
-            gnrc_netif_hdr_t *hdr = pkt->data;
-            char addr_str[GNRC_NETIF_HDR_L2ADDR_PRINT_LEN];
-            printf("dst_l2addr: %s\n",
-                   gnrc_netif_addr_to_str(addr_str, sizeof(addr_str),
-                                          gnrc_netif_hdr_get_dst_addr(hdr),
-                                          (size_t)hdr->dst_l2addr_len));
-            //gnrc_netif_hdr_print(pkt->data);
-            break;
-#endif
-#ifdef MODULE_GNRC_SIXLOWPAN
-        case GNRC_NETTYPE_SIXLOWPAN:
-            printf("NETTYPE_SIXLOWPAN (%i)\n", pkt->type);
-            sixlowpan_print(pkt->data, pkt->size);
-            break;
-#endif
-#ifdef MODULE_GNRC_IPV6
-        case GNRC_NETTYPE_IPV6:
-            printf("NETTYPE_IPV6 (%i)\n", pkt->type);
-            ipv6_hdr_print(pkt->data);
-            break;
-#endif
-#ifdef MODULE_GNRC_ICMPV6
-        case GNRC_NETTYPE_ICMPV6:
-            printf("NETTYPE_ICMPV6 (%i)\n", pkt->type);
-            break;
-#endif
-#ifdef MODULE_GNRC_TCP
-        case GNRC_NETTYPE_TCP:
-            printf("NETTYPE_TCP (%i)\n", pkt->type);
-            break;
-#endif
-#ifdef MODULE_GNRC_UDP
-        case GNRC_NETTYPE_UDP:
-            printf("NETTYPE_UDP (%i)\n", pkt->type);
-            udp_hdr_print(pkt->data);
-            break;
-#endif
-#ifdef TEST_SUITES
-        case GNRC_NETTYPE_TEST:
-            printf("NETTYPE_TEST (%i)\n", pkt->type);
-            od_hex_dump(pkt->data, pkt->size, OD_WIDTH_DEFAULT);
-            break;
-#endif
-        default:
-            printf("NETTYPE_UNKNOWN (%i)\n", pkt->type);
-            od_hex_dump(pkt->data, pkt->size, OD_WIDTH_DEFAULT);
+      default:
             break;
     }
 }
@@ -111,15 +64,12 @@ static void _dump(gnrc_pktsnip_t *pkt)
     gnrc_pktsnip_t *snip = pkt;
 
     while (snip != NULL) {
-        printf("~~ SNIP %2i - size: %3u byte, type: ", snips,
-               (unsigned int)snip->size);
         _dump_snip(snip);
         ++snips;
         size += snip->size;
         snip = snip->next;
     }
 
-    printf("~~ PKT    - %2i snips, total size: %3i byte\n", snips, size);
     gnrc_pktbuf_release(pkt);
 }
 
@@ -140,11 +90,9 @@ static void *_eventloop(void *arg)
 
         switch (msg.type) {
             case GNRC_NETAPI_MSG_TYPE_RCV:
-                puts("PKTDUMP: data received :");
                 _dump(msg.content.ptr);
                 break;
             case GNRC_NETAPI_MSG_TYPE_SND:
-                puts("PKTDUMP: data to send:");
                 _dump(msg.content.ptr);
                 break;
             case GNRC_NETAPI_MSG_TYPE_GET:
@@ -152,7 +100,6 @@ static void *_eventloop(void *arg)
                 msg_reply(&msg, &reply);
                 break;
             default:
-                puts("PKTDUMP: received something unexpected");
                 break;
         }
     }
