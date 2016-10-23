@@ -148,11 +148,6 @@ extern "C" {
 #endif
 
 /**
- * @brief   Special value meaning "wait forever" (don't timeout)
- */
-#define SOCK_NO_TIMEOUT     (UINT32_MAX)
-
-/**
  * @brief   Abstract IP end point and end point for a raw IP sock object
  */
 typedef struct {

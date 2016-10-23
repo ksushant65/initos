@@ -115,6 +115,7 @@ stamptime(void)
     long secs, msecs;
     struct timeval tv;
     time_t t;
+    struct tm *tmp;
     char timec[20];
 
     gettimeofday(&tv, NULL) ;
@@ -130,13 +131,13 @@ stamptime(void)
             msecs += 1000;
         }
 
-        fprintf(stderr, "%04li.%03li ", secs, msecs);
+        fprintf(stderr, "%04lu.%03lu ", secs, msecs);
     }
     else {
         startsecs = secs;
         startmsecs = msecs;
         t = time(NULL);
-        struct tm *tmp = localtime(&t);
+        tmp = localtime(&t);
         strftime(timec, sizeof(timec), "%T", tmp);
         //    fprintf(stderr,"\n%s.%03lu ",timec,msecs);
         fprintf(stderr, "\n%s ", timec);
@@ -898,7 +899,8 @@ int
 main(int argc, char **argv)
 {
     int c;
-    int tunfd;
+    int tunfd, maxfd;
+    int ret;
     fd_set rset, wset;
     FILE *inslip;
     const char *siodev = NULL;
@@ -1185,7 +1187,7 @@ main(int argc, char **argv)
     ifconf(tundev, ipaddr);
 
     while (1) {
-        int maxfd = 0;
+        maxfd = 0;
         FD_ZERO(&rset);
         FD_ZERO(&wset);
 
@@ -1219,7 +1221,7 @@ main(int argc, char **argv)
             }
         }
 
-        int ret = select(maxfd + 1, &rset, &wset, NULL, NULL);
+        ret = select(maxfd + 1, &rset, &wset, NULL, NULL);
 
         if (ret == -1 && errno != EINTR) {
             err(1, "select");
@@ -1252,8 +1254,10 @@ main(int argc, char **argv)
             }
 
             if (delaymsec == 0) {
+                int size;
+
                 if (slip_empty() && FD_ISSET(tunfd, &rset)) {
-                    int size = tun_to_serial(tunfd, slipfd);
+                    size = tun_to_serial(tunfd, slipfd);
                     slip_flushbuf(slipfd);
                     sigalarm_reset();
 

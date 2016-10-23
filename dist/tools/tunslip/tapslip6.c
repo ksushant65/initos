@@ -299,7 +299,7 @@ void
 write_to_serial(int outfd, void *inbuf, int len)
 {
     u_int8_t *p = inbuf;
-    int i;
+    int i, ecode;
 
     /*  printf("Got packet of length %d - write SLIP\n", len);*/
     /*  print_packet(p, len);*/
@@ -543,7 +543,8 @@ int
 main(int argc, char **argv)
 {
     int c;
-    int tunfd, slipfd;
+    int tunfd, slipfd, maxfd;
+    int ret;
     fd_set rset, wset;
     FILE *inslip;
     const char *siodev = NULL;
@@ -680,7 +681,7 @@ main(int argc, char **argv)
     ifconf(tundev, ipaddr, netmask);
 
     while (1) {
-        int maxfd = 0;
+        maxfd = 0;
         FD_ZERO(&rset);
         FD_ZERO(&wset);
 
@@ -722,7 +723,7 @@ main(int argc, char **argv)
             }
         }
 
-        int ret = select(maxfd + 1, &rset, &wset, NULL, NULL);
+        ret = select(maxfd + 1, &rset, &wset, NULL, NULL);
 
         if (ret == -1 && errno != EINTR) {
             err(1, "select");

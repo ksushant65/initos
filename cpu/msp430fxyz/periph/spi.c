@@ -24,7 +24,6 @@
 
 #include "cpu.h"
 #include "mutex.h"
-#include "assert.h"
 #include "periph_cpu.h"
 #include "periph_conf.h"
 #include "periph/spi.h"
@@ -53,21 +52,18 @@ int spi_init_master(spi_t dev, spi_conf_t conf, spi_speed_t speed)
     SPI_DEV->TCTL = (USART_TCTL_SSEL_SMCLK | USART_TCTL_STC);
     /* set polarity and phase */
     switch (conf) {
-        case SPI_CONF_FIRST_RISING:
+        case SPI_CONF_SECOND_RISING:
             SPI_DEV->TCTL |= USART_TCTL_CKPH;
             break;
-        case SPI_CONF_SECOND_RISING:
-            /* nothing to be done here */
-            break;
         case SPI_CONF_FIRST_FALLING:
-            SPI_DEV->TCTL |= (USART_TCTL_CKPH & USART_TCTL_CKPL);
+            SPI_DEV->TCTL |= SPI_CONF_FIRST_FALLING;
             break;
         case SPI_CONF_SECOND_FALLING:
-            SPI_DEV->TCTL |= USART_TCTL_CKPL;
+            SPI_DEV->TCTL |= (USART_TCTL_CKPH | SPI_CONF_FIRST_FALLING);
             break;
         default:
-            /* invalid clock setting */
-            return -2;
+            /* do nothing */
+            break;
     }
     /* configure clock - we use no modulation for now */
     uint32_t br = CLOCK_CMCLK;
@@ -126,20 +122,20 @@ int spi_init_master(spi_t dev, spi_conf_t conf, spi_speed_t speed)
     /* set polarity and phase */
     switch (conf) {
         case SPI_CONF_FIRST_RISING:
-            SPI_DEV->CTL0 |= USCI_SPI_CTL0_CKPH;
+            SPI_DEV->CTL0 |= (USCI_SPI_CTL0_CKPH & ~(USCI_SPI_CTL0_CKPL));
             break;
         case SPI_CONF_SECOND_RISING:
-            /* nothing to be done here */
+            SPI_DEV->CTL0 |= (~(USCI_SPI_CTL0_CKPH) & ~(USCI_SPI_CTL0_CKPL));
             break;
         case SPI_CONF_FIRST_FALLING:
             SPI_DEV->CTL0 |= (USCI_SPI_CTL0_CKPH & USCI_SPI_CTL0_CKPL);
             break;
         case SPI_CONF_SECOND_FALLING:
-            SPI_DEV->CTL0 |= USCI_SPI_CTL0_CKPL;
+            SPI_DEV->CTL0 |= (~(USCI_SPI_CTL0_CKPH) & USCI_SPI_CTL0_CKPL);
             break;
         default:
-            /* invalid clock setting */
-            return -2;
+            /* do nothing */
+            break;
     }
     /* configure clock - we use no modulation for now */
     uint32_t br = CLOCK_CMCLK;
@@ -214,43 +210,18 @@ int spi_release(spi_t dev)
     return 0;
 }
 
-int spi_transfer_bytes(spi_t dev, char *out, char *in, unsigned int length)
+int spi_transfer_byte(spi_t dev, char out, char *in)
 {
     (void)dev;
-
-    assert(out || in);
-
-    /* if we only send out data, we do this the fast way... */
-    if (!in) {
-        for (unsigned i = 0; i < length; i++) {
-            while (!(SPI_IF & SPI_IE_TX_BIT)) {}
-            SPI_DEV->TXBUF = (uint8_t)out[i];
-        }
-        /* finally we need to wait, until all transfers are complete */
-#ifndef SPI_USE_USCI
-        while (!(SPI_IF & SPI_IE_TX_BIT) || !(SPI_IF & SPI_IE_RX_BIT)) {}
-#else
-        while (SPI_DEV->STAT & USCI_SPI_STAT_UCBUSY) {}
-#endif
-        SPI_DEV->RXBUF;
+    char tmp;
+    while (!(SPI_IF & SPI_IE_TX_BIT)) {}
+    SPI_DEV->TXBUF = (uint8_t)out;
+    while (!(SPI_IF & SPI_IE_RX_BIT)) {}
+    tmp = (char)SPI_DEV->RXBUF;
+    if (in) {
+        *in = tmp;
     }
-    else if (!out) {
-        for (unsigned i = 0; i < length; i++) {
-            SPI_DEV->TXBUF = 0;
-            while (!(SPI_IF & SPI_IE_RX_BIT)) {}
-            in[i] = (char)SPI_DEV->RXBUF;
-        }
-    }
-    else {
-        for (unsigned i = 0; i < length; i++) {
-            while (!(SPI_IF & SPI_IE_TX_BIT)) {}
-            SPI_DEV->TXBUF = out[i];
-            while (!(SPI_IF & SPI_IE_RX_BIT)) {}
-            in[i] = (char)SPI_DEV->RXBUF;
-        }
-    }
-
-    return length;
+    return 1;
 }
 
 void spi_poweron(spi_t dev)

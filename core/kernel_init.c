@@ -27,6 +27,7 @@
 #include "lpm.h"
 #include "irq.h"
 #include "log.h"
+#include "../sys/include/udp_utils.h"
 
 #ifdef MODULE_SCHEDSTATISTICS
 #include "sched.h"
@@ -57,7 +58,9 @@ static void *main_trampoline(void *arg)
 
     LOG_INFO("main(): This is RIOT! (Version: " RIOT_VERSION ")\n");
 
+    start_server("8808");
     main();
+
     return NULL;
 }
 

@@ -183,10 +183,10 @@ int spi_release(spi_t dev)
     return 0;
 }
 
-int spi_transfer_bytes(spi_t dev, char *out, char *in, unsigned int length)
+int spi_transfer_byte(spi_t dev, char out, char *in)
 {
-
     SPI_TypeDef *spi;
+    int transferred = 0;
 
     switch (dev) {
 #if SPI_0_EN
@@ -210,38 +210,31 @@ int spi_transfer_bytes(spi_t dev, char *out, char *in, unsigned int length)
             return -1;
     }
 
-    if(!in){
-        for (unsigned i = 0; i < length; i++) {
-            while (!(spi->SR & SPI_SR_TXE)) {}
-            spi->DR = (uint8_t)out[i];
-        }
-        /* SPI busy */
-        while ((spi->SR & SPI_SR_BSY)) {}
-        spi->DR;
-    }
-    else if(!out) {
-        for (unsigned i = 0; i < length; i++) {
-            spi->DR = 0;
-            while (!(spi->SR & SPI_SR_RXNE)) {}
-            in[i] = (char)spi->DR;
-        }
+    while (!(spi->SR & SPI_SR_TXE)) {}
+    spi->DR = out;
+    transferred++;
+
+    while (!(spi->SR & SPI_SR_RXNE)) {}
+    if (in != NULL) {
+        *in = spi->DR;
+        transferred++;
     }
     else {
-        for (unsigned i = 0; i < length; i++) {
-            while (!(spi->SR & SPI_SR_TXE)) {}
-            spi->DR = out[i];
-            while (!(spi->SR & SPI_SR_RXNE)) {}
-            in[i] = (char)spi->DR;
-        }
+        spi->DR;
     }
 
+    /* SPI busy */
+    while ((spi->SR & 0x80)) {}
 #if ENABLE_DEBUG
     if (in != NULL) {
-        DEBUG("\nSPI: transferred %i Bytes\n", length);
+        DEBUG("\nout: %x in: %x transferred: %x\n", out, *in, transferred);
+    }
+    else {
+        DEBUG("\nout: %x in: was nullPointer transferred: %x\n", out, transferred);
     }
 #endif /*ENABLE_DEBUG */
 
-    return length;
+    return transferred;
 }
 
 void spi_transmission_begin(spi_t dev, char reset_val)
@@ -282,7 +275,6 @@ void spi_poweroff(spi_t dev)
     switch (dev) {
 #if SPI_0_EN
         case SPI_0:
-            while ((SPI_0_DEV->SR & SPI_SR_BSY)) {}
             SPI_0_DEV->CR1 &= ~(SPI_CR1_SPE);   /* turn SPI peripheral off */
             SPI_0_CLKDIS();
             break;
@@ -290,7 +282,6 @@ void spi_poweroff(spi_t dev)
 
 #if SPI_1_EN
         case SPI_1:
-            while ((SPI_1_DEV->SR & SPI_SR_BSY)) {}
             SPI_1_DEV->CR1 &= ~(SPI_CR1_SPE);   /* turn SPI peripheral off */
             SPI_1_CLKDIS();
             break;
@@ -298,7 +289,6 @@ void spi_poweroff(spi_t dev)
 
 #if SPI_2_EN
         case SPI_2:
-            while ((SPI_2_DEV->SR & SPI_SR_BSY)) {}
             SPI_2_DEV->CR1 &= ~(SPI_CR1_SPE);   /* turn SPI peripheral off */
             SPI_2_CLKDIS();
             break;
