@@ -86,7 +86,7 @@ void start_server(char *port_str)
         return;
     }
     /* start server (which means registering pktdump for the chosen port) */
-    server.pid = gnrc_pktdump_pid;
+    server.pid = gnrc_udp_init();
     server.demux_ctx = (uint32_t)port;
     gnrc_netreg_register(GNRC_NETTYPE_UDP, &server);
     printf("Success: started UDP server on port %" PRIu16 "\n", port);
@@ -103,52 +103,4 @@ void stop_server(void)
     gnrc_netreg_unregister(GNRC_NETTYPE_UDP, &server);
     server.pid = KERNEL_PID_UNDEF;
     puts("Success: stopped UDP server");
-}
-
-int udp_cmd(int argc, char **argv)
-{
-    if (argc < 2) {
-        printf("usage: %s [send|server]\n", argv[0]);
-        return 1;
-    }
-
-    if (strcmp(argv[1], "send") == 0) {
-        uint32_t num = 1;
-        uint32_t delay = 1000000;
-        if (argc < 5) {
-            printf("usage: %s send <addr> <port> <data> [<num> [<delay in us>]]\n",
-                   argv[0]);
-            return 1;
-        }
-        if (argc > 5) {
-            num = (uint32_t)atoi(argv[5]);
-        }
-        if (argc > 6) {
-            delay = (uint32_t)atoi(argv[6]);
-        }
-        send(argv[2], argv[3], argv[4], num, delay);
-    }
-    else if (strcmp(argv[1], "server") == 0) {
-        if (argc < 3) {
-            printf("usage: %s server [start|stop]\n", argv[0]);
-            return 1;
-        }
-        if (strcmp(argv[2], "start") == 0) {
-            if (argc < 4) {
-                printf("usage %s server start <port>\n", argv[0]);
-                return 1;
-            }
-            start_server(argv[3]);
-        }
-        else if (strcmp(argv[2], "stop") == 0) {
-            stop_server();
-        }
-        else {
-            puts("error: invalid command");
-        }
-    }
-    else {
-        puts("error: invalid command");
-    }
-    return 0;
 }

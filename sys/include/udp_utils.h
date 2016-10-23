@@ -8,6 +8,4 @@ extern void start_server(char *port_str);
 
 extern void stop_server(void);
 
-extern int udp_cmd(int argc, char **argv);
-
 #endif
