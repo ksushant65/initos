@@ -32,6 +32,7 @@
 #include "net/udp.h"
 #include "net/sixlowpan.h"
 #include "od.h"
+#include "udp_utils.h"
 
 /**
  * @brief   PID of the pktdump thread
@@ -47,10 +48,13 @@ static void _dump_snip(gnrc_pktsnip_t *pkt)
 {
   char addr_str[IPV6_ADDR_MAX_STR_LEN];
   ipv6_hdr_t *hdr = pkt->data;
+  char *addr = ipv6_addr_to_str(addr_str, &hdr->src,sizeof(addr_str));
+
   switch (pkt->type) {
       case GNRC_NETTYPE_IPV6:
-            printf("This guy %s just pinged\n", ipv6_addr_to_str(addr_str, &hdr->src,
-                    sizeof(addr_str)));
+            printf("This guy %s just pinged\n", addr);
+
+            //send(addr, "8808", "ping", 1, 0);
             break;
       default:
             break;

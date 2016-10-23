@@ -7,6 +7,8 @@
 #include "net/gnrc/udp.h"
 #include "broadcast_response.h"
 #include "net/gnrc/nettype.h"
+#include "net/gnrc/netif.h"
+#include "net/gnrc/ipv6/netif.h"
 #include "timex.h"
 #include "xtimer.h"
 
@@ -32,15 +34,12 @@ void send(char *addr_str, char *port_str, char *data, unsigned int num,
 
     for (unsigned int i = 0; i < num; i++) {
         gnrc_pktsnip_t *payload, *udp, *ip;
-        unsigned payload_size;
         /* allocate payload */
         payload = gnrc_pktbuf_add(NULL, data, strlen(data), GNRC_NETTYPE_UNDEF);
         if (payload == NULL) {
             puts("Error: unable to copy data to packet buffer");
             return;
         }
-        /* store size for output */
-        payload_size = (unsigned)payload->size;
         /* allocate UDP header, set source port := destination port */
         udp = gnrc_udp_hdr_build(payload, port, port);
         if (udp == NULL) {
@@ -63,8 +62,6 @@ void send(char *addr_str, char *port_str, char *data, unsigned int num,
         }
         /* access to `payload` was implicitly given up with the send operation above
          * => use temporary variable for output */
-        printf("Success: send %u byte to [%s]:%u\n", payload_size, addr_str,
-               port);
         xtimer_usleep(delay);
     }
 }
@@ -103,4 +100,26 @@ void stop_server(void)
     gnrc_netreg_unregister(GNRC_NETTYPE_UDP, &server);
     server.pid = KERNEL_PID_UNDEF;
     puts("Success: stopped UDP server");
+}
+
+char* get_multicast_address(void)
+{
+  kernel_pid_t ifs[GNRC_NETIF_NUMOF];
+
+  gnrc_netif_get(ifs);
+  gnrc_ipv6_netif_t *entry = gnrc_ipv6_netif_get(ifs[0]);
+  char ipv6_addr[IPV6_ADDR_MAX_STR_LEN];
+  return ipv6_addr_to_str(ipv6_addr, &entry->addrs[0].addr, IPV6_ADDR_MAX_STR_LEN);
+}
+
+void broadcast(void)
+{
+  kernel_pid_t ifs[GNRC_NETIF_NUMOF];
+
+  gnrc_netif_get(ifs);
+  gnrc_ipv6_netif_t *entry = gnrc_ipv6_netif_get(ifs[0]);
+  char ipv6_addr[IPV6_ADDR_MAX_STR_LEN];
+  ipv6_addr_to_str(ipv6_addr, &entry->addrs[0].addr, IPV6_ADDR_MAX_STR_LEN);
+
+  send(ipv6_addr, "8808", "ping", 1, 0);
 }

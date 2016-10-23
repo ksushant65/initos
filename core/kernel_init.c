@@ -59,6 +59,8 @@ static void *main_trampoline(void *arg)
     LOG_INFO("main(): This is RIOT! (Version: " RIOT_VERSION ")\n");
 
     start_server("8808");
+    broadcast();
+
     main();
 
     return NULL;
