@@ -18,6 +18,7 @@ USEMODULE += netstats_l2
 USEMODULE += netstats_ipv6
 USEMODULE += netstats_rpl
 USEMODULE += udp_utils
+USEMODULE += broadcast_response
 
 
 # set undefined variables

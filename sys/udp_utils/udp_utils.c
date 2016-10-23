@@ -5,7 +5,7 @@
 #include "net/gnrc.h"
 #include "net/gnrc/ipv6.h"
 #include "net/gnrc/udp.h"
-#include "net/gnrc/pktdump.h"
+#include "broadcast_response.h"
 #include "net/gnrc/nettype.h"
 #include "timex.h"
 #include "xtimer.h"
@@ -86,7 +86,7 @@ void start_server(char *port_str)
         return;
     }
     /* start server (which means registering pktdump for the chosen port) */
-    server.pid = gnrc_udp_init();
+    server.pid = broadcast_response_init();
     server.demux_ctx = (uint32_t)port;
     gnrc_netreg_register(GNRC_NETTYPE_UDP, &server);
     printf("Success: started UDP server on port %" PRIu16 "\n", port);
