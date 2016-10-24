@@ -10,5 +10,5 @@ extern void stop_server(void);
 
 extern char* get_multicast_address(void);
 
-extern void broadcast(void);
+extern void broadcast(char* message);
 #endif

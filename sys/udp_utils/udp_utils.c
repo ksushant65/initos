@@ -112,7 +112,7 @@ char* get_multicast_address(void)
   return ipv6_addr_to_str(ipv6_addr, &entry->addrs[0].addr, IPV6_ADDR_MAX_STR_LEN);
 }
 
-void broadcast(void)
+void broadcast(char* message)
 {
   kernel_pid_t ifs[GNRC_NETIF_NUMOF];
 
@@ -121,5 +121,5 @@ void broadcast(void)
   char ipv6_addr[IPV6_ADDR_MAX_STR_LEN];
   ipv6_addr_to_str(ipv6_addr, &entry->addrs[0].addr, IPV6_ADDR_MAX_STR_LEN);
 
-  send(ipv6_addr, "8808", "ping", 1, 0);
+  send(ipv6_addr, "8808", message, 1, 0);
 }
