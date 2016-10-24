@@ -23,6 +23,7 @@
 #define GNRC_PKTDUMP_H_
 
 #include "kernel_types.h"
+#include "net/gnrc/pkt.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -61,6 +62,8 @@ extern kernel_pid_t broadcast_response_pid;
  * @return  negative value on error
  */
 kernel_pid_t broadcast_response_init(void);
+
+char** get_response(gnrc_pktsnip_t *pkt);
 
 #ifdef __cplusplus
 }

@@ -20,6 +20,7 @@
 
 #include <inttypes.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <errno.h>
 #include "byteorder.h"
@@ -33,6 +34,7 @@
 #include "net/sixlowpan.h"
 #include "od.h"
 #include "udp_utils.h"
+#include "net/gnrc/pkt.h"
 
 /**
  * @brief   PID of the pktdump thread
@@ -56,6 +58,10 @@ static void _dump_snip(gnrc_pktsnip_t *pkt)
 
             //send(addr, "8808", "ping", 1, 0);
             break;
+     case GNRC_NETTYPE_UNDEF:
+            printf("NETTYPE_UNDEF (%i)\n", pkt->type);
+
+            break;
       default:
             break;
     }
@@ -63,6 +69,8 @@ static void _dump_snip(gnrc_pktsnip_t *pkt)
 
 static void _dump(gnrc_pktsnip_t *pkt)
 {
+
+
     int snips = 0;
     int size = 0;
     gnrc_pktsnip_t *snip = pkt;
@@ -94,7 +102,8 @@ static void *_eventloop(void *arg)
 
         switch (msg.type) {
             case GNRC_NETAPI_MSG_TYPE_RCV:
-                _dump(msg.content.ptr);
+                printf("Data Received :  %s \n",get_response(msg.content.ptr)[1]);
+                //_dump(msg.content.ptr);
                 break;
             case GNRC_NETAPI_MSG_TYPE_SND:
                 _dump(msg.content.ptr);
@@ -110,6 +119,35 @@ static void *_eventloop(void *arg)
 
     /* never reached */
     return NULL;
+}
+
+
+char** get_response(gnrc_pktsnip_t *pkt)
+{
+    char** string;
+    string = (char **)malloc(2*sizeof(char *));
+    int i;
+    for (i=0; i<2; i++)
+        string[i] = (char *)malloc(IPV6_ADDR_MAX_STR_LEN*sizeof(char));
+
+    gnrc_pktsnip_t *data_snip = gnrc_pktsnip_search_type(pkt,GNRC_NETTYPE_UNDEF);
+    gnrc_pktsnip_t *addr_snip = gnrc_pktsnip_search_type(pkt,GNRC_NETTYPE_IPV6);
+
+    char addr_str[IPV6_ADDR_MAX_STR_LEN];
+    ipv6_hdr_t *hdr = addr_snip->data;
+    ipv6_addr_to_str(addr_str, &hdr->src,sizeof(addr_str));
+    strcpy(string[0],addr_str);
+
+    size_t index = 0;
+    while(index < data_snip->size)
+    {
+        string[1][index] = *((char *)data_snip->data + index);
+        index++;
+    }
+
+    
+    return string;
+
 }
 
 kernel_pid_t broadcast_response_init(void)
