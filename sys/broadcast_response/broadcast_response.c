@@ -102,8 +102,19 @@ static void *_eventloop(void *arg)
 
         switch (msg.type) {
             case GNRC_NETAPI_MSG_TYPE_RCV:
-                printf("Data Received :  %s \n",get_response(msg.content.ptr)[1]);
-                //_dump(msg.content.ptr);
+                if(get_response(msg.content.ptr)[1][0] == '1')
+                {
+                  char* addr = get_response(msg.content.ptr)[0];
+                  printf("Added %s\n", addr);
+                  //TODO: Add this address in list
+                  send(addr, "8808", "0", 1, 0);
+                }
+                else if(get_response(msg.content.ptr)[1][0] == '0')
+                {
+                  char* addr = get_response(msg.content.ptr)[0];
+                  printf("Added %s\n", addr);
+                  //TODO: Add this address in list
+                }
                 break;
             case GNRC_NETAPI_MSG_TYPE_SND:
                 _dump(msg.content.ptr);
@@ -145,7 +156,7 @@ char** get_response(gnrc_pktsnip_t *pkt)
         index++;
     }
 
-    
+
     return string;
 
 }
