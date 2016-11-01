@@ -28,6 +28,7 @@
 #include "irq.h"
 #include "log.h"
 #include "../sys/include/udp_utils.h"
+#include "../sys/include/broadcast_response.h"
 
 #ifdef MODULE_SCHEDSTATISTICS
 #include "sched.h"
@@ -58,7 +59,7 @@ static void *main_trampoline(void *arg)
 
     LOG_INFO("main(): This is RIOT! (Version: " RIOT_VERSION ")\n");
 
-    start_server("8808");
+    start_server("8808", broadcast_response_init);
     // max_length = MAX_BROADCAST_LEN defined in broadcast.h
     broadcast("1 GARAGE_DOOR");
 
