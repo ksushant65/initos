@@ -43,6 +43,10 @@ extern "C" {
 #define GNRC_PKTDUMP_PRIO               (THREAD_PRIORITY_MAIN - 1)
 #endif
 
+#ifndef MAX_BROADCAST_LEN
+#define MAX_BROADCAST_LEN		(46)
+#endif
+
 /**
  * @brief   Stack size used for the pktdump thread
  */
@@ -63,8 +67,8 @@ extern kernel_pid_t broadcast_response_pid;
  */
 kernel_pid_t broadcast_response_init(void);
 
-char** get_response(gnrc_pktsnip_t *pkt);
-
+char** parse_response(gnrc_pktsnip_t *pkt);
+void print_map(void);
 #ifdef __cplusplus
 }
 #endif

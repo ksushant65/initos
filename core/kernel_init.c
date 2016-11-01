@@ -59,7 +59,8 @@ static void *main_trampoline(void *arg)
     LOG_INFO("main(): This is RIOT! (Version: " RIOT_VERSION ")\n");
 
     start_server("8808");
-    broadcast("1");
+    // max_length = MAX_BROADCAST_LEN defined in broadcast.h
+    broadcast("1 GARAGE_DOOR");
 
     main();
 
