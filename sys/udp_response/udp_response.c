@@ -26,7 +26,7 @@
 #include "byteorder.h"
 #include "thread.h"
 #include "msg.h"
-#include "broadcast_response.h"
+#include "udp_response.h"
 #include "net/gnrc.h"
 #include "net/ipv6/addr.h"
 #include "net/ipv6/hdr.h"
@@ -42,6 +42,7 @@
  */
 kernel_pid_t broadcast_response_pid = KERNEL_PID_UNDEF;
 
+void (*callback)(char**);
 /**
  * @brief   Stack for the pktdump thread
  */
@@ -107,8 +108,8 @@ static void *_eventloop(void *arg)
         switch (msg.type) {
             case GNRC_NETAPI_MSG_TYPE_RCV:
 		        ; //empty statement to resolve "error: a label can only be part of a statement and declaration is not a statement"
-        		char** resp = parse_response(msg.content.ptr);
-        		char* addr = resp[0];
+        		callback(parse_response(msg.content.ptr));
+        		/*char* addr = resp[0];
         		//printf("Added %s\n", addr);
                 if(resp[1][0] == '1')
                 {
@@ -118,7 +119,7 @@ static void *_eventloop(void *arg)
         		strcpy(result, addr);
                 strcat(result, " ");
         		strcat(result, resp[1]+2);
-        		vector_append(&map, result);
+        		vector_append(&map, result);*/
                 //print_map();
         		//_dump(msg.content.ptr);
                 break;
@@ -177,12 +178,13 @@ void print_map(void){
     }
 }
 
-kernel_pid_t broadcast_response_init(void)
+kernel_pid_t udp_response_init(void (*cb)(char**))
 {
     if (broadcast_response_pid == KERNEL_PID_UNDEF) {
         broadcast_response_pid = thread_create(_stack, sizeof(_stack), GNRC_PKTDUMP_PRIO,
                              THREAD_CREATE_STACKTEST,
                              _eventloop, NULL, "broadcast_response");
     }
+    callback = cb;
     return broadcast_response_pid;
 }

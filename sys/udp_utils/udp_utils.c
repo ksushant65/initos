@@ -65,7 +65,7 @@ void send(char *addr_str, char *port_str, char *data, unsigned int num,
     }
 }
 
-void start_server(char *port_str, kernel_pid_t (*callback)(void))
+void start_server(char *port_str, kernel_pid_t (*callback)(void (*cb)(char**)), void (*cb)(char**))
 {
     uint16_t port;
 
@@ -82,7 +82,7 @@ void start_server(char *port_str, kernel_pid_t (*callback)(void))
         return;
     }
     /* start server (which means registering pktdump for the chosen port) */
-    server.pid = (*callback)();
+    server.pid = (*callback)(cb);
     server.demux_ctx = (uint32_t)port;
     gnrc_netreg_register(GNRC_NETTYPE_UDP, &server);
     printf("Success: started UDP server on port %" PRIu16 "\n", port);
