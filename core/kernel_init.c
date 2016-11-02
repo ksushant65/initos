@@ -62,8 +62,8 @@ static void *main_trampoline(void *arg)
 
     LOG_INFO("main(): This is RIOT! (Version: " RIOT_VERSION ")\n");
 
-    start_server("8808");
     char* broadcast_string = (char*)malloc(sizeof(char)*100);
+    start_server("8808");
     broadcast_string[0] = '1';
     broadcast_string[1] = ' ';
     //printf("%s %s", SERVICE, broadcast_string);
@@ -80,7 +80,7 @@ static void *main_trampoline(void *arg)
     p_s.min_max[1][1] = 70;
     p_s.min_max[2][0] = 200;
     p_s.min_max[2][1] = 700;
-    
+
     char *pkt_data = "2.566 30.55 200.1";
     printf("Packet Validity: %d",parser(p_s,pkt_data));
     main();
