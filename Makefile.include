@@ -18,7 +18,7 @@ USEMODULE += netstats_l2
 USEMODULE += netstats_ipv6
 USEMODULE += netstats_rpl
 # USEMODULE += udp_utils
-USEMODULE += udp_response
+USEMODULE += broadcast_response
 USEMODULE += udp_utils
 
 

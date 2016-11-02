@@ -65,7 +65,7 @@ extern kernel_pid_t broadcast_response_pid;
  * @return  PID of the pktdump thread
  * @return  negative value on error
  */
-kernel_pid_t udp_response_init(void (*cb)(char**));
+kernel_pid_t broadcast_response_init(void);
 
 char** parse_response(gnrc_pktsnip_t *pkt);
 void print_map(void);

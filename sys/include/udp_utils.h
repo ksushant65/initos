@@ -5,7 +5,7 @@
 
 extern void send(char *addr_str, char *port_str, char *data, unsigned int num, unsigned int delay);
 
-extern void start_server(char *port_str, kernel_pid_t (*callback)(void (*cb)(char**)), void (*cb)(char**));
+extern void start_server(char *port_str, kernel_pid_t (*callback)(void));
 
 extern void stop_server(void);
 
