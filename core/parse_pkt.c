@@ -25,14 +25,14 @@ char **split(char *str, size_t len, char delim, char ***result, unsigned long *c
   for (i=0; i<len; ++i) {
 
     // to compare against a list of delimiters,
-    // define delim as a string and replace 
+    // define delim as a string and replace
     // the next line:
     //     if (str[i]==delim) {
     //
     // with the two following lines:
     //     char *c=delim; while(*c && *c!=str[i]) c++;
     //     if (*c) {
-    //       
+    //
     if (str[i]==delim) {
 
       // replace delimiter with zero
@@ -60,7 +60,7 @@ char **split(char *str, size_t len, char delim, char ***result, unsigned long *c
   }
 
   // else allocate memory for result
-  // and fill the result array                                                                                    
+  // and fill the result array
 
   *result=malloc((*count)*sizeof(char*));
   if (!*result) {
@@ -87,15 +87,16 @@ char **split(char *str, size_t len, char delim, char ***result, unsigned long *c
 }
 
 
-int parser(pkt_structure p_s, char *pkt_data){
+int parser(char *pkt_data){
+  pkt_structure p_s = packet_structure;
 	char **result = 0;
 	unsigned long count;
 	unsigned long i=0;
 	int flag =1;
-	
+
 	split(strdup(pkt_data),strlen(pkt_data),' ', &result, &count, 0);
-	if((int)count != p_s.size)	return 0;
-	
+	if((int)count != SIZE)	return 0;
+
 	for(i=0; i<count; i++){
 		float num = atof(result[i]);
 		if(!(num >= p_s.min_max[i][0] && num <= p_s.min_max[i][1]))

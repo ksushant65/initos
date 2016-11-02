@@ -37,6 +37,7 @@
 #include "net/gnrc/pkt.h"
 #include "../../core/include/map.h"
 #include "../../core/include/sensor_data.h"
+#include "../../core/include/parse_pkt.h"
 
 /**
  * @brief   PID of the pktdump thread
