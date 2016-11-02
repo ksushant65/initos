@@ -5,6 +5,7 @@
 #include "net/gnrc.h"
 #include "net/gnrc/ipv6.h"
 #include "net/gnrc/udp.h"
+#include "broadcast_response.h"
 #include "net/gnrc/nettype.h"
 #include "net/gnrc/netif.h"
 #include "net/gnrc/ipv6/netif.h"
@@ -65,7 +66,7 @@ void send(char *addr_str, char *port_str, char *data, unsigned int num,
     }
 }
 
-void start_server(char *port_str, kernel_pid_t (*callback)(void))
+void start_server(char *port_str)
 {
     uint16_t port;
 
@@ -82,7 +83,7 @@ void start_server(char *port_str, kernel_pid_t (*callback)(void))
         return;
     }
     /* start server (which means registering pktdump for the chosen port) */
-    server.pid = (*callback)();
+    server.pid = broadcast_response_init();
     server.demux_ctx = (uint32_t)port;
     gnrc_netreg_register(GNRC_NETTYPE_UDP, &server);
     printf("Success: started UDP server on port %" PRIu16 "\n", port);

@@ -1,11 +1,10 @@
 #ifndef UDP_UTILS_H
 #define UDP_UTILS_H
 
-#include "kernel_types.h"
 
 extern void send(char *addr_str, char *port_str, char *data, unsigned int num, unsigned int delay);
 
-extern void start_server(char *port_str, kernel_pid_t (*callback)(void));
+extern void start_server(char *port_str);
 
 extern void stop_server(void);
 
