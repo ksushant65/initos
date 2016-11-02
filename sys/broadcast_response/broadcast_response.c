@@ -49,44 +49,7 @@ static char _stack[GNRC_PKTDUMP_STACKSIZE];
 
 Vector map;
 
-static void _dump_snip(gnrc_pktsnip_t *pkt)
-{
-  char addr_str[IPV6_ADDR_MAX_STR_LEN];
-  ipv6_hdr_t *hdr = pkt->data;
-  char *addr = ipv6_addr_to_str(addr_str, &hdr->src,sizeof(addr_str));
 
-  switch (pkt->type) {
-      case GNRC_NETTYPE_IPV6:
-            printf("This guy %s just pinged\n", addr);
-
-            //send(addr, "8808", "ping", 1, 0);
-            break;
-     case GNRC_NETTYPE_UNDEF:
-            printf("NETTYPE_UNDEF (%i)\n", pkt->type);
-
-            break;
-      default:
-            break;
-    }
-}
-
-static void _dump(gnrc_pktsnip_t *pkt)
-{
-
-
-    int snips = 0;
-    int size = 0;
-    gnrc_pktsnip_t *snip = pkt;
-
-    while (snip != NULL) {
-        _dump_snip(snip);
-        ++snips;
-        size += snip->size;
-        snip = snip->next;
-    }
-
-    gnrc_pktbuf_release(pkt);
-}
 
 static void *_eventloop(void *arg)
 {
@@ -108,22 +71,32 @@ static void *_eventloop(void *arg)
             case GNRC_NETAPI_MSG_TYPE_RCV:
 		        ; //empty statement to resolve "error: a label can only be part of a statement and declaration is not a statement"
         		char** resp = parse_response(msg.content.ptr);
-        		char* addr = resp[0];
-        		//printf("Added %s\n", addr);
-                if(resp[1][0] == '1')
-                {
-                    send(addr, "8808", "0 DOOR_LOCK", 1, 0);
-                }
-        		char *result = (char*)malloc(strlen(addr)+strlen(resp[1]));
-        		strcpy(result, addr);
-                strcat(result, " ");
-        		strcat(result, resp[1]+2);
-        		vector_append(&map, result);
-                //print_map();
-        		//_dump(msg.content.ptr);
-                break;
+            char* addr = resp[0];
+            char* data = resp[1];
+
+            if (data[0] == '0') {
+              char *result = (char*)malloc(strlen(addr)+strlen(data));
+              strcpy(result, addr);
+              strcat(result, " ");
+          		strcat(result, data+2);
+          		vector_append(&map, result);
+            }
+            if (data[0] == '1') {
+              send(addr, "8808", "0 DOOR_LOCK", 1, 0);
+              char *result = (char*)malloc(strlen(addr)+strlen(data));
+              strcpy(result, addr);
+              strcat(result, " ");
+          		strcat(result, data+2);
+          		vector_append(&map, result);
+            }
+            /*if (data[0] == '0') {
+
+            }
+            if (data[0] == '0') {
+
+            }*/
+        		print_map();
             case GNRC_NETAPI_MSG_TYPE_SND:
-                _dump(msg.content.ptr);
                 break;
             case GNRC_NETAPI_MSG_TYPE_GET:
             case GNRC_NETAPI_MSG_TYPE_SET:
