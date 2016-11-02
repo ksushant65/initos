@@ -66,11 +66,8 @@ static void *main_trampoline(void *arg)
     start_server("8808");
     broadcast_string[0] = '1';
     broadcast_string[1] = ' ';
-    //printf("%s %s", SERVICE, broadcast_string);
     strcat(broadcast_string,SERVICE);
-    printf("%s\n", broadcast_string);
     broadcast(broadcast_string);
-    //broadcast("0 hello");
 
     pkt_structure p_s;
     p_s.size = 3;

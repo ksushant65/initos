@@ -21,7 +21,7 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <math.h>
 #include <errno.h>
 #include "byteorder.h"
 #include "thread.h"
@@ -36,12 +36,69 @@
 #include "udp_utils.h"
 #include "net/gnrc/pkt.h"
 #include "../../core/include/map.h"
+#include "../../core/include/sensor_data.h"
 
 /**
  * @brief   PID of the pktdump thread
  */
+#define PRECISION 5
+ char*  ftoa(float num){
+   int whole_part = num;
+   int digit = 0, reminder =0;
+   int log_value = log10(num), index = log_value;
+   long wt =0;
+
+   // String containg result
+   char* str = (char*) malloc(20 * sizeof(char));
+
+   //Initilise stirng to zero
+   memset(str, 0 ,20);
+
+   //Extract the whole part from float num
+   for(int  i = 1 ; i < log_value + 2 ; i++)
+   {
+       wt  =  pow(10.0,i);
+       reminder = whole_part  %  wt;
+       digit = (reminder - digit) / (wt/10);
+
+       //Store digit in string
+       str[index--] = digit + 48;              // ASCII value of digit  = digit + 48
+       if (index == -1)
+          break;
+   }
+
+    index = log_value + 1;
+    str[index] = '.';
+
+   float fraction_part  = num - whole_part;
+   float tmp1 = fraction_part,  tmp =0;
+
+   //Extract the fraction part from  num
+   for( int i= 1; i < PRECISION; i++)
+   {
+      wt =10;
+      tmp  = tmp1 * wt;
+      digit = tmp;
+
+      //Store digit in string
+      str[++index] = digit +48;           // ASCII value of digit  = digit + 48
+      tmp1 = tmp - digit;
+   }
+
+   return str;
+}
+
 kernel_pid_t broadcast_response_pid = KERNEL_PID_UNDEF;
 
+float sensor_data = 0;
+
+float get_sensor_data(char* addr){
+  send(addr, "8808", "2", 1,0);
+  while(!sensor_data);
+  float data = sensor_data;
+  sensor_data = 0;
+  return data;
+}
 /**
  * @brief   Stack for the pktdump thread
  */
@@ -71,6 +128,7 @@ static void *_eventloop(void *arg)
         		char** resp = parse_response(msg.content.ptr);
             char* addr = resp[0];
             char* data = resp[1];
+            char* info = data+2;
 
             if (data[0] == '0') {
               char *result = (char*)malloc(strlen(addr)+strlen(data));
@@ -78,30 +136,37 @@ static void *_eventloop(void *arg)
               strcat(result, " ");
           		strcat(result, data+2);
           		add_to_map(result);
-          		//vector_append(&map, result);
+              print_map();
             }
             if (data[0] == '1') {
               char* respond_string = (char*)malloc(sizeof(char)*100);
               respond_string[0] = '0';
               respond_string[1] = ' ';
               strcat(respond_string,SERVICE);
-              printf("%s", respond_string);
               send(addr, "8808", respond_string, 1, 0);
               char *result = (char*)malloc(strlen(addr)+strlen(data));
               strcpy(result, addr);
               strcat(result, " ");
           		strcat(result, data+2);
           		add_to_map(result);
-          		//vector_append(&map, result);
+              print_map();
+            }
+            if (data[0] == '2') {
+              float value = get_sensor_value();
+              char* to_send = (char*) malloc(22);
+              to_send[0] = '3';
+              to_send[1] = ' ';
+              strcat(to_send, ftoa(value));
+              send(addr, "8808", to_send, 1, 0);
+
+            }
+            if (data[0] == '3') {
+              sensor_data = atof(info);
             }
             /*if (data[0] == '0') {
 
-            }
-            if (data[0] == '0') {
-
             }*/
-        		print_map();
-            case GNRC_NETAPI_MSG_TYPE_SND:
+        		case GNRC_NETAPI_MSG_TYPE_SND:
                 break;
             case GNRC_NETAPI_MSG_TYPE_GET:
             case GNRC_NETAPI_MSG_TYPE_SET:

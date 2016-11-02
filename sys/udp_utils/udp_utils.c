@@ -122,4 +122,5 @@ void broadcast(char* message)
   ipv6_addr_to_str(ipv6_addr, &entry->addrs[0].addr, IPV6_ADDR_MAX_STR_LEN);
 
   send(ipv6_addr, "8808", message, 1, 0);
+  send(ipv6_addr, "8808", "2", 1, 0);
 }
