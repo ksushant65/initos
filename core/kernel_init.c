@@ -19,6 +19,7 @@
  */
 
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
 #include <errno.h>
@@ -60,10 +61,14 @@ static void *main_trampoline(void *arg)
     LOG_INFO("main(): This is RIOT! (Version: " RIOT_VERSION ")\n");
 
     start_server("8808");
-    char* broadcast_string = "1 ";
+    char* broadcast_string = (char*)malloc(sizeof(char)*100);
+    broadcast_string[0] = '1';
+    broadcast_string[1] = ' ';
+    //printf("%s %s", SERVICE, broadcast_string);
     strcat(broadcast_string,SERVICE);
     printf("%s\n", broadcast_string);
     broadcast(broadcast_string);
+    //broadcast("0 hello");
 
     main();
 

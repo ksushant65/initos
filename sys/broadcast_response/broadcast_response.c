@@ -82,8 +82,11 @@ static void *_eventloop(void *arg)
           		vector_append(&map, result);
             }
             if (data[0] == '1') {
-              char* respond_string = "0 ";
+              char* respond_string = (char*)malloc(sizeof(char)*100);
+              respond_string[0] = '0';
+              respond_string[1] = ' ';
               strcat(respond_string,SERVICE);
+              printf("%s", respond_string);
               send(addr, "8808", respond_string, 1, 0);
               char *result = (char*)malloc(strlen(addr)+strlen(data));
               strcpy(result, addr);
