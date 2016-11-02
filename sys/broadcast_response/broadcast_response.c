@@ -82,7 +82,9 @@ static void *_eventloop(void *arg)
           		vector_append(&map, result);
             }
             if (data[0] == '1') {
-              send(addr, "8808", "0 DOOR_LOCK", 1, 0);
+              char* respond_string = "0 ";
+              strcat(respond_string,SERVICE);
+              send(addr, "8808", respond_string, 1, 0);
               char *result = (char*)malloc(strlen(addr)+strlen(data));
               strcpy(result, addr);
               strcat(result, " ");

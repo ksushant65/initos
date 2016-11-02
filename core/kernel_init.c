@@ -19,6 +19,7 @@
  */
 
 #include <stdint.h>
+#include <string.h>
 #include <stdbool.h>
 #include <errno.h>
 #include "kernel_init.h"
@@ -59,8 +60,10 @@ static void *main_trampoline(void *arg)
     LOG_INFO("main(): This is RIOT! (Version: " RIOT_VERSION ")\n");
 
     start_server("8808");
-    // max_length = MAX_BROADCAST_LEN defined in broadcast.h
-    broadcast("1 GARAGE_DOOR");
+    char* broadcast_string = "1 ";
+    strcat(broadcast_string,SERVICE);
+    printf("%s\n", broadcast_string);
+    broadcast(broadcast_string);
 
     main();
 
