@@ -30,6 +30,8 @@
 #include "irq.h"
 #include "log.h"
 #include "../sys/include/udp_utils.h"
+#include "parse_pkt.h"
+#include "pkt_struct.h"
 
 #ifdef MODULE_SCHEDSTATISTICS
 #include "sched.h"
@@ -70,6 +72,17 @@ static void *main_trampoline(void *arg)
     broadcast(broadcast_string);
     //broadcast("0 hello");
 
+    pkt_structure p_s;
+    p_s.size = 3;
+    p_s.min_max[0][0] = 2;
+    p_s.min_max[0][1] = 7;
+    p_s.min_max[1][0] = 20;
+    p_s.min_max[1][1] = 70;
+    p_s.min_max[2][0] = 200;
+    p_s.min_max[2][1] = 700;
+    
+    char *pkt_data = "2.566 30.55 200.1";
+    printf("Packet Validity: %d",parser(p_s,pkt_data));
     main();
 
     return NULL;
