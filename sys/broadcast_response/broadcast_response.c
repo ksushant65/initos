@@ -21,7 +21,6 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 #include <errno.h>
 #include "byteorder.h"
 #include "thread.h"
@@ -39,54 +38,39 @@
 #include "../../core/include/sensor_data.h"
 #include "../../core/include/parse_pkt.h"
 
-/**
- * @brief   PID of the pktdump thread
- */
-#define PRECISION 5
- char*  ftoa(float num){
-   int whole_part = num;
-   int digit = 0, reminder =0;
-   int log_value = log10(num), index = log_value;
-   long wt =0;
+char* itoa(int i, char b[]){
+    char const digit[] = "0123456789";
+    char* p = b;
+    if(i<0){
+        *p++ = '-';
+        i *= -1;
+    }
+    int shifter = i;
+    do{ //Move to where representation ends
+        ++p;
+        shifter = shifter/10;
+    }while(shifter);
+    *p = '\0';
+    do{ //Move back, inserting digits as u go
+        *--p = digit[i%10];
+        i = i/10;
+    }while(i);
+    return b;
+}
 
-   // String containg result
-   char* str = (char*) malloc(20 * sizeof(char));
+char*  ftoa(float num){
+   int integer_part = num;
+   int float_part = (num-integer_part)*100;
 
-   //Initilise stirng to zero
-   memset(str, 0 ,20);
+   char* int_string = (char*)malloc(13);
+   itoa(integer_part,int_string);
+   char float_string[2];
+   itoa(float_part,float_string);
 
-   //Extract the whole part from float num
-   for(int  i = 1 ; i < log_value + 2 ; i++)
-   {
-       wt  =  pow(10.0,i);
-       reminder = whole_part  %  wt;
-       digit = (reminder - digit) / (wt/10);
+   strcat(int_string,".");
+   strcat(int_string,float_string);
 
-       //Store digit in string
-       str[index--] = digit + 48;              // ASCII value of digit  = digit + 48
-       if (index == -1)
-          break;
-   }
-
-    index = log_value + 1;
-    str[index] = '.';
-
-   float fraction_part  = num - whole_part;
-   float tmp1 = fraction_part,  tmp =0;
-
-   //Extract the fraction part from  num
-   for( int i= 1; i < PRECISION; i++)
-   {
-      wt =10;
-      tmp  = tmp1 * wt;
-      digit = tmp;
-
-      //Store digit in string
-      str[++index] = digit +48;           // ASCII value of digit  = digit + 48
-      tmp1 = tmp - digit;
-   }
-
-   return str;
+   return int_string;
 }
 
 kernel_pid_t broadcast_response_pid = KERNEL_PID_UNDEF;
@@ -163,6 +147,7 @@ static void *_eventloop(void *arg)
             }
             if (data[0] == '3') {
               sensor_data = atof(info);
+              printf("%f\n", sensor_data);
             }
             /*if (data[0] == '0') {
 
