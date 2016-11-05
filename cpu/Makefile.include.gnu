@@ -12,3 +12,4 @@ export SIZE = $(PREFIX)size
 export OBJCOPY = $(PREFIX)objcopy
 export OBJDUMP = $(PREFIX)objdump
 export DBG = $(GDBPREFIX)gdb
+

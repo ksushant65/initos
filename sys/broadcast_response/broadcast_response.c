@@ -149,10 +149,13 @@ static void *_eventloop(void *arg)
               sensor_data = atof(info);
               printf("%f\n", sensor_data);
             }
-            /*if (data[0] == '0') {
+            if(data[0] == '4') {
+		//To be used on receiving config packets
+            }
+	    if(data[0] == '5') {
 
-            }*/
-        		case GNRC_NETAPI_MSG_TYPE_SND:
+	    }
+       	    case GNRC_NETAPI_MSG_TYPE_SND:
                 break;
             case GNRC_NETAPI_MSG_TYPE_GET:
             case GNRC_NETAPI_MSG_TYPE_SET:
