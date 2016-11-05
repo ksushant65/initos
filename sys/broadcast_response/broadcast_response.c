@@ -111,11 +111,13 @@ static void *_eventloop(void *arg)
             case GNRC_NETAPI_MSG_TYPE_RCV:
 		        ; //empty statement to resolve "error: a label can only be part of a statement and declaration is not a statement"
         		char** resp = parse_response(msg.content.ptr);
+                //resp must have null at the end
             char* addr = resp[0];
             char* data = resp[1];
             char* info = data+2;
 
             if (data[0] == '0') {
+                //reply of ping
               char *result = (char*)malloc(strlen(addr)+strlen(data));
               strcpy(result, addr);
               strcat(result, " ");
@@ -124,6 +126,7 @@ static void *_eventloop(void *arg)
               print_map();
             }
             if (data[0] == '1') {
+                //ping
               char* respond_string = (char*)malloc(sizeof(char)*100);
               respond_string[0] = '0';
               respond_string[1] = ' ';
@@ -137,6 +140,7 @@ static void *_eventloop(void *arg)
               print_map();
             }
             if (data[0] == '2') {
+                //send sensory data format="2"
               float value = get_sensor_value();
               char* to_send = (char*) malloc(22);
               to_send[0] = '3';
@@ -146,15 +150,26 @@ static void *_eventloop(void *arg)
 
             }
             if (data[0] == '3') {
+                //receive sensory data from another node format=not worth mentioning
               sensor_data = atof(info);
               printf("%f\n", sensor_data);
             }
-            if(data[0] == '4') {
-		//To be used on receiving config packets
+            if (data[0] == '4'){
+                //set sensory data format="4 2 32 ..."
+                int i=0, start=0;
+                while(info[i]){
+                    if(info[i] == ' '){
+                        char* value = info+start;
+                        info[i] = '\0';
+                        set_sensor_value(atof(value));
+                        //printf("value: %f\n", atof(value));
+                        start = i+1;
+                    }
+                    i++;
+                }
+                //printf("value: %f\n", atof(info+start));
+                set_sensor_value(atof(info+start));
             }
-	    if(data[0] == '5') {
-
-	    }
        	    case GNRC_NETAPI_MSG_TYPE_SND:
                 break;
             case GNRC_NETAPI_MSG_TYPE_GET:
