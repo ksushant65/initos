@@ -20,3 +20,5 @@ void vector_set(Vector *vector, int index, char*);
 void vector_double_capacity_if_full(Vector *vector);
 
 void vector_free(Vector *vector);
+
+int vector_get_index(Vector *vector,char* value);

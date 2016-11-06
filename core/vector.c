@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "vector.h"
+#include "include/vector.h"
 
 int numOfCols;
 
@@ -31,6 +31,17 @@ char* vector_get(Vector *vector, int index) {
     exit(1);
   }
   return vector->data[index];
+}
+
+int vector_get_index(Vector *vector,char* value){
+    int index = 0;
+    while(index < vector->size || strcmp(vector->data[index], value) == 0)
+      index++;
+
+    if(index == vector->size)
+      return -1;
+
+    return index;
 }
 
 void vector_set(Vector *vector, int index, char* value) {
