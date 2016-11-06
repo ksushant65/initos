@@ -45,7 +45,7 @@ char * get_config(char *ip, char *sensor_value)
 {
 	char *nullConfig = '\0';
 	if(contains_ip_sensor(ip,sensor_value)){
-		int size = smart_table.size, i, j;
+		int size = smart_table.size, i;
     	for(i=0;i<size; i++)
     	{
 	        char *entry = smart_table.data[i];
@@ -61,7 +61,7 @@ char * get_config(char *ip, char *sensor_value)
 
 int contains_ip_sensor(char *ip,char *sensor_value)
 {
-	int size = smart_table.size, i, j;
+	int size = smart_table.size, i;
     for(i=0;i<size; i++)
     {
         char *entry = smart_table.data[i];
@@ -76,7 +76,7 @@ int contains_ip_sensor(char *ip,char *sensor_value)
 
 void update_entry(char *entry)
 {
-	int size = smart_table.size, i, j;
+	int size = smart_table.size, i;
     for(i=0;i<size; i++){
         char *data = smart_table.data[i];
 
