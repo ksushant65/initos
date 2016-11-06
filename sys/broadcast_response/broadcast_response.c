@@ -162,12 +162,10 @@ static void *_eventloop(void *arg)
                         char* value = info+start;
                         info[i] = '\0';
                         set_sensor_value(atof(value));
-                        //printf("value: %f\n", atof(value));
                         start = i+1;
                     }
                     i++;
                 }
-                //printf("value: %f\n", atof(info+start));
                 set_sensor_value(atof(info+start));
             }
        	    case GNRC_NETAPI_MSG_TYPE_SND:

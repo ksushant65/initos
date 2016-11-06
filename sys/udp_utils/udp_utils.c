@@ -123,4 +123,5 @@ void broadcast(char* message)
 
   send(ipv6_addr, "8808", message, 1, 0);
   send(ipv6_addr, "8808", "2", 1, 0);
+  send(ipv6_addr, "8808", "4 10.10 300.0 4.3", 1, 0);
 }
