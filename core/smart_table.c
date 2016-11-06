@@ -50,8 +50,8 @@ char * get_config(char *ip, char *sensor_value)
     	{
 	        char *entry = smart_table.data[i];
 
-	        if(strcmp(get_ip(entry),ip) == 0 && strcmp(get_sensor_value(entry),sensor_value) == 0){
-	        	return get_config_data(entry);
+	        if(strcmp(get_ip_from_table(entry),ip) == 0 && strcmp(get_sensor_value_from_table(entry),sensor_value) == 0){
+	        	return get_config_data_from_table(entry);
 	        }
     	}
 	}
@@ -66,7 +66,7 @@ int contains_ip_sensor(char *ip,char *sensor_value)
     {
         char *entry = smart_table.data[i];
 
-        if(strcmp(get_ip(entry),ip) == 0 && strcmp(get_sensor_value(entry),sensor_value) == 0){
+        if(strcmp(get_ip_from_table(entry),ip) == 0 && strcmp(get_sensor_value_from_table(entry),sensor_value) == 0){
         	return 1;
         }
     }
@@ -80,7 +80,7 @@ void update_entry(char *entry)
     for(i=0;i<size; i++){
         char *data = smart_table.data[i];
 
-        if(strcmp(get_ip(entry),get_ip(data)) == 0 && strcmp(get_sensor_value(entry),get_sensor_value(data)) == 0){
+        if(strcmp(get_ip_from_table(entry),get_ip_from_table(data)) == 0 && strcmp(get_sensor_value_from_table(entry),get_sensor_value_from_table(data)) == 0){
         	strcpy(smart_table.data[i],entry);
         }
     }
@@ -96,7 +96,7 @@ void delete_smart_table(void)
 	vector_free(&smart_table);
 }
 
-char* get_ip(char* entry)
+char* get_ip_from_table(char* entry)
 {
 	char* ip;
 	int i;
@@ -112,7 +112,7 @@ char* get_ip(char* entry)
 	return ip;
 }
 
-char* get_sensor_value(char* entry)
+char* get_sensor_value_from_table(char* entry)
 {
 	int i=0;
 	while(entry[i] != ip_sensor_delim)
@@ -129,7 +129,7 @@ char* get_sensor_value(char* entry)
 	return sensor_value;
 }
 
-char* get_config_data(char* entry)
+char* get_config_data_from_table(char* entry)
 {
 	int i=0;
 	while(entry[i] != sensor_config_delim)

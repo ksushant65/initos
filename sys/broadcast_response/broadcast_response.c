@@ -37,6 +37,7 @@
 #include "../../core/include/map.h"
 #include "../../core/include/sensor_data.h"
 #include "../../core/include/parse_pkt.h"
+#include "../../core/include/smart_table.h"
 
 char* itoa(int i, char b[]){
     char const digit[] = "0123456789";
@@ -93,6 +94,7 @@ static void *_eventloop(void *arg)
 {
     (void)arg;
     map_init();
+    smart_table_init();
     //vector_init(&map, 2*MAX_BROADCAST_LEN);
 
     msg_t msg, reply;
@@ -156,6 +158,14 @@ static void *_eventloop(void *arg)
             }
             if (data[0] == '4'){
                 //set sensory data format="4 2 32 ..."
+
+                printf("info = %s\n", info);
+                printf("sensor value = %f\n", get_sensor_data(addr));
+
+                char* sensor = ftoa(get_sensor_data(addr));
+                add_to_table(addr,sensor,info);
+                print_smart_table();
+
                 int i=0, start=0;
                 while(info[i]){
                     if(info[i] == ' '){
@@ -167,6 +177,10 @@ static void *_eventloop(void *arg)
                     i++;
                 }
                 set_sensor_value(atof(info+start));
+
+
+                printf("sensor value afterwards = %f\n", get_sensor_data(addr));
+
             }
        	    case GNRC_NETAPI_MSG_TYPE_SND:
                 break;

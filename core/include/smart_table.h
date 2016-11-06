@@ -16,10 +16,10 @@ void add_entry_to_smart_table(char * entry);
 
 void delete_smart_table(void);
 
-char* get_ip(char* entry);
+char* get_ip_from_table(char* entry);
 
-char* get_sensor_value(char* entry);
+char* get_sensor_value_from_table(char* entry);
 
-char* get_config_data(char* entry);
+char* get_config_data_from_table(char* entry);
 
 void print_smart_table(void);
