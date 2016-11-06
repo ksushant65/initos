@@ -65,9 +65,9 @@ static void *main_trampoline(void *arg)
 
     char* broadcast_string = (char*)malloc(sizeof(char)*100);
     start_server("8808");
-    broadcast_string[0] = '4';
+    broadcast_string[0] = '1';
     broadcast_string[1] = ' ';
-    strcat(broadcast_string,"10.10 300.0 4.3");
+    strcat(broadcast_string,SERVICE);
     broadcast(broadcast_string);
 
     main();
