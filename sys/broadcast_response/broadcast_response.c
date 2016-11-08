@@ -39,6 +39,8 @@
 #include "../../core/include/parse_pkt.h"
 #include "../../core/include/smart_table.h"
 
+char config[20], ip[20];
+
 char* itoa(int i, char b[]){
     char const digit[] = "0123456789";
     char* p = b;
@@ -76,15 +78,6 @@ char*  ftoa(float num){
 
 kernel_pid_t broadcast_response_pid = KERNEL_PID_UNDEF;
 
-float sensor_data = 0;
-
-float get_sensor_data(char* addr){
-  send(addr, "8808", "2", 1,0);
-  while(!sensor_data);
-  float data = sensor_data;
-  sensor_data = 0;
-  return data;
-}
 /**
  * @brief   Stack for the pktdump thread
  */
@@ -153,18 +146,15 @@ static void *_eventloop(void *arg)
             }
             if (data[0] == '3') {
                 //receive sensory data from another node format=not worth mentioning
-              sensor_data = atof(info);
-              printf("%f\n", sensor_data);
+              add_to_table(ip,info,config);
+              print_smart_table();
             }
             if (data[0] == '4'){
                 //set sensory data format="4 2 32 ..."
 
-                printf("info = %s\n", info);
-                printf("sensor value = %f\n", get_sensor_data(addr));
-
-                char* sensor = ftoa(get_sensor_data(addr));
-                add_to_table(addr,sensor,info);
-                print_smart_table();
+                send(addr, "8808", "2", 1, 0);
+                strcpy(ip,addr);
+                strcpy(config,info);
 
                 int i=0, start=0;
                 while(info[i]){
@@ -177,10 +167,6 @@ static void *_eventloop(void *arg)
                     i++;
                 }
                 set_sensor_value(atof(info+start));
-
-
-                printf("sensor value afterwards = %f\n", get_sensor_data(addr));
-
             }
        	    case GNRC_NETAPI_MSG_TYPE_SND:
                 break;
