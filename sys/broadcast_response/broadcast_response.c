@@ -150,7 +150,8 @@ static void *_eventloop(void *arg)
               print_smart_table();
             }
             if (data[0] == '4'){
-                //set sensory data format="4 2 32 ..."
+                //set config data
+                //format="4 2 32 ..."
 
                 send(addr, "8808", "2", 1, 0);
                 strcpy(ip,addr);
@@ -167,6 +168,24 @@ static void *_eventloop(void *arg)
                     i++;
                 }
                 set_sensor_value(atof(info+start));
+            }
+            if (data[0] == '5') {
+                //send sensory data format="5"
+              float value = get_sensor_value();
+              char* to_send = (char*) malloc(22);
+              to_send[0] = '6';
+              to_send[1] = ' ';
+              strcat(to_send, ftoa(value));
+              send(addr, "8808", to_send, 1, 0);
+
+            }
+            if (data[0] == '6') {
+              printf("Here is the corresponding config %s\n", get_config(ip,info));
+            }
+            if (data[0] == '7'){
+                //Receives packet from user's device and starts the process
+                send(addr, "8808", "5", 1, 0);
+                strcpy(ip,addr);
             }
        	    case GNRC_NETAPI_MSG_TYPE_SND:
                 break;
