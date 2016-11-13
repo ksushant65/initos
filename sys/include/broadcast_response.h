@@ -44,7 +44,7 @@ extern "C" {
 #endif
 
 #ifndef MAX_BROADCAST_LEN
-#define MAX_BROADCAST_LEN		(46)
+#define MAX_BROADCAST_LEN		(100)
 #endif
 
 /**

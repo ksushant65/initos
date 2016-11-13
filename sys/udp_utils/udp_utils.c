@@ -11,12 +11,37 @@
 #include "net/gnrc/ipv6/netif.h"
 #include "timex.h"
 #include "xtimer.h"
+#include "msg.h"
+#include "net/ipv6/addr.h"
+#include "net/gnrc/netif.h"
+#include "net/gnrc/ipv6/netif.h"
 
 static gnrc_netreg_entry_t server = { NULL, GNRC_NETREG_DEMUX_CTX_ALL, KERNEL_PID_UNDEF };
 
-void send(char *addr_str, char *port_str, char *data, unsigned int num,
+void send(char *addr_str, char *port_str, char *olddata, unsigned int num,
                  unsigned int delay)
 {
+    kernel_pid_t ifs[GNRC_NETIF_NUMOF];
+    size_t numof = gnrc_netif_get(ifs);
+    char ipv6_addr[IPV6_ADDR_MAX_STR_LEN];
+
+    if (numof > 0) {
+        gnrc_ipv6_netif_t *entry = gnrc_ipv6_netif_get(ifs[0]);
+        for (int i = 0; i < GNRC_IPV6_NETIF_ADDR_NUMOF; i++) {
+            if ((ipv6_addr_is_link_local(&entry->addrs[i].addr)) && !(entry->addrs[i].flags & GNRC_IPV6_NETIF_ADDR_FLAGS_NON_UNICAST)) {
+                //char ipv6_addr[IPV6_ADDR_MAX_STR_LEN];
+                ipv6_addr_to_str(ipv6_addr, &entry->addrs[i].addr, IPV6_ADDR_MAX_STR_LEN);
+            }
+        }
+    }
+
+    char *data = (char*)malloc(sizeof(char)*100);
+    memset(data, '\0', sizeof(char)*100);
+    strcat(data, olddata);
+    strcat(data, " ");
+    strcat(data,ipv6_addr);
+    printf("packet: %s\n", data);
+
     uint16_t port;
     ipv6_addr_t addr;
 
@@ -121,6 +146,11 @@ void broadcast(char* message)
   char ipv6_addr[IPV6_ADDR_MAX_STR_LEN];
   ipv6_addr_to_str(ipv6_addr, &entry->addrs[0].addr, IPV6_ADDR_MAX_STR_LEN);
 
+  printf("%s\n", ipv6_addr);
+
   send(ipv6_addr, "8808", message, 1, 0);
-  send(ipv6_addr, "8808", "4 10.10 300.0 4.3", 1, 0);
+  char *new_message = (char*)malloc(sizeof(char)*100);
+  memset(new_message, '\0', sizeof(char)*100);
+  strcat(new_message, "4 10.10 300.0 4.3 mylocalip");
+  //send(ipv6_addr, "8808", new_message, 1, 0);
 }

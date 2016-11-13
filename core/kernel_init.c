@@ -64,10 +64,11 @@ static void *main_trampoline(void *arg)
     LOG_INFO("main(): This is RIOT! (Version: " RIOT_VERSION ")\n");
 
     char* broadcast_string = (char*)malloc(sizeof(char)*100);
+    memset(broadcast_string, '\0', sizeof(char)*100);
     start_server("8808");
-    broadcast_string[0] = '1';
-    broadcast_string[1] = ' ';
+    strcat(broadcast_string, "1 ");
     strcat(broadcast_string,SERVICE);
+    strcat(broadcast_string, " ::");
     broadcast(broadcast_string);
 
     main();
