@@ -141,12 +141,11 @@ def listen(sock, lis):
     global riot_ip
     global tap_ip
     global wlan_ip
-    global blacklist
     while(True):
         data, address = sock.recvfrom(4096)
         pprint("while():")
         pprint("[+]Received {} from {}".format(data, address))
-        if data and len(data.split(' '))>=3 and data not in blacklist:
+        if data and len(data.split(' '))>=3:
             values = data.split(' ')
             config = values[0]
             ip = values[-2]
@@ -154,7 +153,6 @@ def listen(sock, lis):
                 pprint("[+]multicast local")
                 riot_ip = address
                 pprint("[+]riot_ip-> "+str(riot_ip))
-                blacklist.append(data)
                 multicast(data)
             elif config in unicast_config and lis=='local':
                 pprint("[+]unicast local")
@@ -163,6 +161,11 @@ def listen(sock, lis):
                 except Exception, e:
                     pprint(e)
             elif lis=='remote':
+                # check if it is a broadcast packet from my own ip
+                if config in multicast_config and address[0] == wlan_ip:
+                    pprint("[+]Packet discarded")
+                    continue
+                # end
                 pprint("[+]remote")
                 remote_ip = values[-1]
                 pprint("[+]Source of Data: "+str(remote_ip))
@@ -183,8 +186,6 @@ def listen(sock, lis):
             pprint(device_map)
             pprint("[+]Triggers:")
             pprint(triggers)
-            # sent = sock.sendto(data, address)
-            # pprint("Replayed the received data")
         else:
             pprint("[-]Invalid data format!!!")
 
