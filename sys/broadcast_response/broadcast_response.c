@@ -218,7 +218,7 @@ static void *_eventloop(void *arg)
             }
             if (data[0] == '7'){
                 //Receives packet from user's device and starts the process
-                send(addr, "8808", "5 ::", 1, 0);
+                send(addr2, "8808", "5 ::", 1, 0);
                 strcpy(ip,addr);
             }
        	    case GNRC_NETAPI_MSG_TYPE_SND:
