@@ -18,7 +18,7 @@ unicast cases:
 	2. config number = 0,3,4,6,7
 '''
 
-multicast_config = ['1','2','5']
+multicast_config = ['1','2','5', '17', '18']
 unicast_config = ['0','3','4','6','7']
 # triggers = []
 device_map = {} # ipv6 -> wlan(ipv4)

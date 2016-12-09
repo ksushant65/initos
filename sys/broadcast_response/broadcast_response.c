@@ -144,7 +144,8 @@ static void *_eventloop(void *arg)
               char* respond_string = (char*)malloc(sizeof(char)*100);
               memset(respond_string, '\0', sizeof(char)*100);
               strcat(respond_string, "0 ");
-              strcat(respond_string,"WTF ");
+              strcat(respond_string,SERVICE);
+              strcat(respond_string," ");
               strcat(respond_string,addr);
               send(addr2, "8808", respond_string, 1, 0);
               char *result = (char*)malloc(sizeof(char)*100);
@@ -211,7 +212,6 @@ static void *_eventloop(void *arg)
               strcat(to_send, addr);
               strcat(to_send, " ::");
               send(addr2, "8808", to_send, 1, 0);
-
             }
             if (data[0] == '6') {
               printf("Here is the corresponding config %s\n", get_config(ip,info));
