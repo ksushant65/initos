@@ -20,7 +20,7 @@ unicast cases:
 
 multicast_config = ['1','2','5']
 unicast_config = ['0','3','4','6','7']
-triggers = []
+# triggers = []
 device_map = {} # ipv6 -> wlan(ipv4)
 riot_ip = ''
 tap_ip = ''
@@ -136,7 +136,7 @@ def listen(sock, lis):
     pprint("lis -> "+lis)
     global multicast
     global unicast
-    global triggers
+    # global triggers
     global device_map
     global riot_ip
     global tap_ip
@@ -169,10 +169,11 @@ def listen(sock, lis):
                 pprint("[+]remote")
                 remote_ip = values[-1]
                 pprint("[+]Source of Data: "+str(remote_ip))
-                if ip_validate(remote_ip, True):
+                if ip_validate(remote_ip, True) or ip_validate(remote_ip, False):
+                    '''
                     if remote_ip not in triggers:
                         triggers.append(address[0])
-                elif ip_validate(remote_ip, False):
+                    '''
                     if remote_ip not in device_map.keys():
                         device_map[remote_ip] = address[0]
                 else:
@@ -184,8 +185,8 @@ def listen(sock, lis):
                 pass
             pprint("[+]Device map:")
             pprint(device_map)
-            pprint("[+]Triggers:")
-            pprint(triggers)
+            # pprint("[+]Triggers:")
+            # pprint(triggers)
         else:
             pprint("[-]Invalid data format!!!")
 

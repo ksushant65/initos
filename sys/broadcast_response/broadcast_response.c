@@ -160,25 +160,39 @@ static void *_eventloop(void *arg)
               float value = get_sensor_value();
               char* to_send = (char*) malloc(sizeof(char)*100);
               memset(to_send, '\0', sizeof(char)*100);
-              strcat(to_send, "3 ");
+
+              strcat(to_send, "17 ");
+              strcat(to_send, SERVICE);
+              strcat(to_send, " ");
               strcat(to_send, ftoa(value));
               strcat(to_send, " ");
-              strcat(to_send, addr);
+              strcat(to_send, info);
+              strcat(to_send, " ::");
               send(addr2, "8808", to_send, 1, 0);
 
             }
             if (data[0] == '3') {
                 //receive sensory data from another node format=not worth mentioning
-              add_to_table(ip,info,config);
-              print_smart_table();
+                printf("New Sensor Value: %s", info);
+                set_sensor_value(atof(info));
+                //add_to_table(ip,info,config);
+                //print_smart_table();
             }
             if (data[0] == '4'){
                 //set config data
                 //format="4 2 32 ..."
 
-                send(addr2, "8808", "2 ::", 1, 0);
+                char* to_send = (char*) malloc(sizeof(char)*100);
+                memset(to_send,'\0', sizeof(char)*100);
+                strcat(to_send,"2 ");
+                strcat(to_send, info);
+                strcat(to_send, " ::");
+                send(addr2, "8808", to_send, 1, 0);
                 strcpy(ip,addr);
-                strcpy(config,info);
+
+                //strcpy(config,info);
+
+
 
                 unsigned long int i=1;
                 while(i<payloadSize-2){
@@ -191,10 +205,11 @@ static void *_eventloop(void *arg)
               float value = get_sensor_value();
               char* to_send = (char*) malloc(sizeof(char)*100);
               memset(to_send, '\0', sizeof(char)*100);
-              strcat(to_send, "6 ");
+              strcat(to_send, "18 ");
               strcat(to_send, ftoa(value));
               strcat(to_send, " ");
               strcat(to_send, addr);
+              strcat(to_send, " ::");
               send(addr2, "8808", to_send, 1, 0);
 
             }
