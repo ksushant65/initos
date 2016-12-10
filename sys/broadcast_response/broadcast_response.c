@@ -173,12 +173,16 @@ static void *_eventloop(void *arg)
 
             }
             if (data[0] == '3') {
+		float val = get_sensor_value();
                 //receive sensory data from another node format=not worth mentioning
-                printf("New Sensor Value: %s", info);
-                set_sensor_value(atof(info));
+                printf("New Sensor Value: %f", val);
+                //set_sensor_value(atof(info));
                 //add_to_table(ip,info,config);
                 //print_smart_table();
             }
+	    if(data[0] == '9') {
+		set_sensor_value(10);
+	    }
             if (data[0] == '4'){
                 //set config data
                 //format="4 2 32 ..."

@@ -1,7 +1,9 @@
-float sensor_value=0;
+#include "sensor_data.h"
+
+float sensor_value=1;
 
 float get_sensor_value(void) {
-  return 2.3;
+  return sensor_value;
 }
 
 int set_sensor_value(float data) {
